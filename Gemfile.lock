@@ -1,0 +1,13 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    triez (1.0.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  triez
+
+BUNDLED WITH
+   1.13.1
