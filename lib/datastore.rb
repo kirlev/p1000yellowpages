@@ -1,70 +1,80 @@
 require 'json'
 require 'triez'
+require_relative 'person'
+require_relative 'query'
 
-class Datastore
-  attr_reader :people, :index
+module P1000YellowPages
+  class Datastore
 
-  def initialize
-    load_data
-    create_index
-  end
-
-  private
-
-  def load_data
-    file = File.read('data/people.json')
-    str_arr = file.split('}},').map! { |p| p + '}}' }
-
-    #remove the extra characters
-    str_arr.first[0] = ''
-    str_arr.last.chop!.chop!.chop!
-
-    @people = str_arr.map do |p,|
-      JSON.parse p
+    def initialize
+      load_data
+      create_indices_map
+      build_names_trie
     end
-  end
 
-  def create_index
-    @index = Triez.new
+    def find query_str
+      query = Query.new(query_str)
+      unless query.legal? &&
+          (query.age.nil? || (@min_age..@max_age).include?(query.age))
+        return []
+      end
 
-    people.each_with_index do |p, i|
-      names_perm = p['name'].downcase.split.permutation.to_a
+      search(query)
+    end
 
-      [p['phone'], p['phone'].gsub('-', '')].each do |phone_format|
-        age_phone_perm = [get_age(p['birthday']).to_s, phone_format].permutation.to_a
-        names_perm.each do |names|
-          age_phone_perm.each do |age_phone|
-            attributes = names + age_phone
-            index.change_all(:suffix, attributes.join(' ') + p["id"]) { i }
-          end
-        end
+    private
+
+    def search query
+      indices = []
+
+      if query.ordered_name
+        indices += @names_trie.search_with_prefix(query.ordered_name).map(&:last)
+      end
+
+      indices << @phone_age_map[query.age] || [] if query.age
+      indices << @phone_age_map[query.stripped_phone] || [] if query.stripped_phone
+      
+      intersected_indices = indices.reduce(:&)
+
+      @people.values_at(*intersected_indices)
+    end
+
+    def load_data
+      file = File.read('data/people.json')
+      str_arr = file.split('}},').map! { |p| p + '}}' }
+
+      #remove the extra characters
+      str_arr.first[0] = ''
+      str_arr.last.chop!.chop!.chop!
+
+      @people = str_arr.map do |p,|
+        Person.new JSON.parse(p)
+      end
+
+      @min_age, @max_age = @people.map(&:age).minmax
+    end
+
+    def build_names_trie
+      @names_trie = Triez.new(value_type: :object)
+
+      @name_map.each do |ordered_name, indices|
+        @names_trie.change_all(:suffix, ordered_name) { indices }
       end
     end
-  end
 
-  # def create_name_index
-  #   @name_index = Triez.new
-  #   people.each_with_index do |p, i|
-  #     @name_index.change_all(:suffix, p["name"].downcase + p["id"]) { i }
-  #   end
-  # end
-  #
-  # def create_age_index
-  #   @age_index = {}
-  #   people.each_with_index do |p, i|
-  #     age = get_age(p['birthday'])
-  #     @age_index[age] ||= []
-  #     @age_index[age] << i
-  #   end
-  # end
-  #
-  # def create_phone_index
-  #   @phone
-  # end
+    def create_indices_map
+      @phone_age_map = {}
+      @name_map = {}
 
-  def get_age timestamp
-    this_year = Time.now.utc.year
-    birth_year = Time.at(timestamp).utc.year
-    this_year - birth_year
+      @people.each_with_index do |p, i|
+        @phone_age_map[p.age] ||= []
+        @phone_age_map[p.stripped_phone] ||= []
+        @name_map[p.ordered_name] ||= []
+
+        @phone_age_map[p.age] << i
+        @phone_age_map[p.stripped_phone] << i
+        @name_map[p.ordered_name] << i
+      end
+    end
   end
 end
