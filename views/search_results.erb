@@ -1,0 +1,29 @@
+<script src="pagination.js"></script>
+
+<% if @found_people.empty? %>
+    <p>No results, please review your search or try a different one</p>
+<% else %>
+    <h2 class="cui__selector--direct__title">
+      Search results
+    </h2>
+
+    <% @found_people.each do |person| %>
+
+        <div class="cui__selector--direct__item">
+          <img class="user-avatar" src="<%= person.avatar_source %>"/>
+
+          <div class="cui__selector--direct__label">
+            <%= person.name %>, <%= person.age %>
+          </div>
+          <div class="cui__selector--direct__label">
+            phone: <%= person.phone %>
+          </div>
+
+          <p class="cui__selector--direct__description">
+            <%= person.address %>
+          </p>
+        </div>
+    <% end %>
+
+    <%= will_paginate @found_people %>
+<% end %>

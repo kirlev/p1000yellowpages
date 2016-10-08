@@ -13,7 +13,11 @@ module P1000YellowPages
     end
 
     def legal?
-      @legal ||= @ages.count < 2 && @stripped_phones.count < 2
+      all_keywords = [@stripped_phones, @ages, @names].flatten
+
+      @legal ||= !all_keywords.empty? &&
+          @ages.count < 2 &&
+          @stripped_phones.count < 2
     end
 
     def age
@@ -32,8 +36,8 @@ module P1000YellowPages
 
     def categorize keyword
       case keyword
-        when /\A[0-9]{4}-[0-9]{6}\z|\A[0-9]{10}\z/
-        @stripped_phones << keyword.gsub('-', '')
+        when /\A[0-9]{4}-[0-9]{5,6}\z|\A[0-9]{9,10}\z/
+          @stripped_phones << keyword.gsub('-', '')
         when /\A\d+\z/
           @ages << keyword.to_i
         else

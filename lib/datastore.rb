@@ -7,33 +7,35 @@ module P1000YellowPages
   class Datastore
 
     def initialize
+      puts "Initializing the Datastore!!"
       load_data
       create_indices_map
       build_names_trie
     end
 
-    def find query_str
+    def search query_str
       query = Query.new(query_str)
       unless query.legal? &&
           (query.age.nil? || (@min_age..@max_age).include?(query.age))
         return []
       end
 
-      search(query)
+      find_all(query)
     end
 
     private
 
-    def search query
+    def find_all query
       indices = []
 
       if query.ordered_name
-        indices += @names_trie.search_with_prefix(query.ordered_name).map(&:last)
+        search_results = @names_trie.search_with_prefix(query.ordered_name)
+        indices << search_results.flat_map(&:last)
       end
 
       indices << @phone_age_map[query.age] || [] if query.age
       indices << @phone_age_map[query.stripped_phone] || [] if query.stripped_phone
-      
+
       intersected_indices = indices.reduce(:&)
 
       @people.values_at(*intersected_indices)

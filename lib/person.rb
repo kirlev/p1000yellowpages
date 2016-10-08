@@ -1,5 +1,6 @@
 module P1000YellowPages
   class Person
+    attr_reader :name, :phone
 
     def initialize args
       @name = args['name']
@@ -37,6 +38,14 @@ module P1000YellowPages
           avatar_origin: @avatar_origin,
           avatar_image: @avatar_image
       }.to_json
+    end
+
+    def avatar_source
+      "#{@avatar_origin}/#{@avatar_image}"
+    end
+
+    def address
+      @address.values.join(', ')
     end
   end
 end
