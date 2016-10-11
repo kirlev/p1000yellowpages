@@ -12,7 +12,6 @@ end
 
 get '/search' do
   query_str = params[:query] || ''
-  puts query_str.class.name
   page = params[:page] || 1
   @found_people = DATASTORE.search(query_str).paginate(page: page,
                                                        per_page: 10)
