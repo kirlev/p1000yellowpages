@@ -1,7 +1,7 @@
 $(document).ready(function () {
     search = function (ev, url) {
         $('.cui__input__label').text('');
-        var query = $('#search_query').val();
+        var query = $('#search_field').val();
         url = url || "/search?query=" + encodeURIComponent(query)
         $("#search_results").load(url, function (responseTxt, statusTxt, xhr) {
             if (statusTxt == "error")
@@ -9,7 +9,7 @@ $(document).ready(function () {
         });
     }
     $("#search_button").click(search);
-    $('#search_query').keypress(function (e) {
+    $('#search_field').keypress(function (e) {
         if (e.which == 13) {
             $("#search_button").click();
             return false;
