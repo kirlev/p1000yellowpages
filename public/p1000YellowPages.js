@@ -10,7 +10,7 @@ $(document).ready(function () {
     }
     $("#search_button").click(search);
     $('#search_field').keypress(function (e) {
-        if (e.which == 13) {
+        if (e.which == 13 && this.value.length > 0) {
             $("#search_button").click();
             return false;
         }
