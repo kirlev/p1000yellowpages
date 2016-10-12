@@ -13,6 +13,7 @@ end
 get '/search' do
   query_str = params[:query] || ''
   page = params[:page] || 1
+  @ds_id = DATASTORE.object_id
   @found_people = DATASTORE.search(query_str).paginate(page: page,
                                                        per_page: 10)
   erb :search_results
