@@ -29,23 +29,12 @@ module P1000YellowPages
       @age ||= Time.now.utc.year - birth_year
     end
 
-    def to_json
-      {
-          name: @name,
-          phone: @phone,
-          age: age,
-          address: @address,
-          avatar_origin: @avatar_origin,
-          avatar_image: @avatar_image
-      }.to_json
-    end
-
     def avatar_source
       "#{@avatar_origin}/#{@avatar_image}"
     end
 
     def address
-      @address.values.join(', ')
+      "#{@address['street']}, #{@address['city']}, #{@address['country']}."
     end
   end
 end
