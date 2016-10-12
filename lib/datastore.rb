@@ -33,8 +33,8 @@ module P1000YellowPages
         indices << search_results.flat_map(&:last)
       end
 
-      indices << @phone_age_map[query.age] || [] if query.age
-      indices << @phone_age_map[query.stripped_phone] || [] if query.stripped_phone
+      indices << (@phone_age_map[query.age] || []) if query.age
+      indices << (@phone_age_map[query.stripped_phone] || []) if query.stripped_phone
 
       intersected_indices = indices.reduce(:&)
 
