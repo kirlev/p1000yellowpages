@@ -7,10 +7,11 @@ module P1000YellowPages
   class Datastore
 
     def initialize
-      puts "Initializing the Datastore!!"
+      puts "Initializing the Datastore....."
       load_data
       create_indices_map
       build_names_trie
+      puts "Datastore initialized successfully!"
     end
 
     def search query_str
