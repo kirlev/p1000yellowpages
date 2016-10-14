@@ -6,7 +6,6 @@ require 'will_paginate/array'
 DATASTORE = P1000YellowPages::Datastore.new
 
 get '/' do
-  puts File.join(settings.public_folder, 'index.html')
   send_file File.join(settings.public_folder, 'index.html')
 end
 

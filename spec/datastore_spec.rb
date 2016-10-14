@@ -1,8 +1,8 @@
-require_relative '../lib/datastore'
+require_relative 'spec_helper'
 
 describe "Datastore" do
     EXAMPLES_AMOUNT = 10
-    before(:all) { @datastore = P1000YellowPages::Datastore.new }
+    before(:all) { @datastore = RSpec.configuration.datastore }
     
     context "#search" do
         let(:person){@datastore.instance_variable_get(:@people).first}
