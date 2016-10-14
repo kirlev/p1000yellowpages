@@ -64,6 +64,8 @@ module P1000YellowPages
           (Array(old_indices) + indices).uniq 
         end
       end
+      
+      @name_map = nil
     end
 
     def create_indices_map
