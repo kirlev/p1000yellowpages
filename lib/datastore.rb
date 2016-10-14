@@ -60,7 +60,9 @@ module P1000YellowPages
       @names_trie = Triez.new(value_type: :object)
 
       @name_map.each do |ordered_name, indices|
-        @names_trie.change_all(:suffix, ordered_name) { indices }
+        @names_trie.change_all(:suffix, ordered_name) do |old_indices| 
+          (Array(old_indices) + indices).uniq 
+        end
       end
     end
 
