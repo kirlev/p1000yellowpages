@@ -30,7 +30,8 @@ module P1000YellowPages
 
       if query.ordered_name
         search_results = @names_trie.search_with_prefix(query.ordered_name)
-        indices << search_results.flat_map(&:last)
+        ordered_names = search_results.flat_map(&:last)
+        indices << @name_map.values_at(*ordered_names).flatten.uniq
       end
 
       indices << (@phone_age_map[query.age] || []) if query.age
@@ -59,13 +60,11 @@ module P1000YellowPages
     def build_names_trie
       @names_trie = Triez.new(value_type: :object)
 
-      @name_map.each do |ordered_name, indices|
-        @names_trie.change_all(:suffix, ordered_name) do |old_indices| 
-          (Array(old_indices) + indices).uniq 
+      @name_map.each do |ordered_name, _|
+        @names_trie.change_all(:suffix, ordered_name) do |old_ordered_names| 
+          (Array(old_ordered_names).push ordered_name).uniq 
         end
       end
-      
-      @name_map = nil
     end
 
     def create_indices_map
