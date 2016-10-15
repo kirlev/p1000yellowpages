@@ -32,14 +32,6 @@ module P1000YellowPages
       @names.sort.join(' ').downcase
     end
 
-    def to_hash
-      {"stripped_phone.like" => stripped_phone,
-      "ordered_name.like" => ("%#{ordered_name}%" if ordered_name),
-      age: age}.select do |_,v|
-        !v.nil?
-      end
-    end
-
     private
 
     def categorize keyword

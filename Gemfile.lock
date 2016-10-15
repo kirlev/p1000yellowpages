@@ -90,6 +90,7 @@ GEM
     sqlite3 (1.3.12)
     stringex (1.5.1)
     tilt (2.0.5)
+    triez (1.0.4)
     uuidtools (2.1.5)
     will_paginate (3.1.3)
 
@@ -104,6 +105,7 @@ DEPENDENCIES
   rspec
   sinatra
   sqlite3
+  triez
   will_paginate
 
 RUBY VERSION

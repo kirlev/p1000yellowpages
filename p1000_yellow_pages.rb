@@ -1,9 +1,9 @@
-require_relative 'lib/datastore'
+require_relative 'lib/data_manager'
 require 'sinatra'
 require 'will_paginate'
 require 'will_paginate/array'
 
-DATASTORE = P1000YellowPages::Datastore.new
+DATASTORE = P1000YellowPages::DataManager.new
 
 get '/' do
   send_file File.join(settings.public_folder, 'index.html')
