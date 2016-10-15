@@ -1,5 +1,4 @@
 require 'json'
-require 'triez'
 require_relative 'person'
 require_relative 'query'
 
@@ -8,16 +7,16 @@ module P1000YellowPages
 
     def initialize
       puts "Initializing the Datastore....."
-      load_data
-      create_indices_map
-      build_names_trie
+      table = 'p1000_yellow_pages_people'
+      unless DataMapper.repository(:default).adapter.storage_exists?(table)
+        load_data
+      end
       puts "Datastore initialized successfully!"
     end
 
     def search query_str
       query = Query.new(query_str)
-      unless query.legal? &&
-          (query.age.nil? || (@min_age..@max_age).include?(query.age))
+      unless query.legal?
         return []
       end
 
@@ -27,23 +26,11 @@ module P1000YellowPages
     private
 
     def find_all query
-      indices = []
-
-      if query.ordered_name
-        search_results = @names_trie.search_with_prefix(query.ordered_name)
-        ordered_names = search_results.flat_map(&:last)
-        indices << @name_map.values_at(*ordered_names).flatten.uniq
-      end
-
-      indices << (@phone_age_map[query.age] || []) if query.age
-      indices << (@phone_age_map[query.stripped_phone] || []) if query.stripped_phone
-
-      intersected_indices = indices.reduce(:&)
-
-      @people.values_at(*intersected_indices)
+      Person.all(query.to_hash)
     end
 
     def load_data
+      Person.auto_migrate!
       file = File.read('data/people.json')
       str_arr = file.split('}},').map! { |p| p + '}}' }
 
@@ -51,35 +38,16 @@ module P1000YellowPages
       str_arr.first[0] = ''
       str_arr.last.chop!.chop!.chop!
 
-      @people = str_arr.map do |p,|
-        Person.new JSON.parse(p)
-      end
-
-      @min_age, @max_age = @people.map(&:age).minmax
-    end
-
-    def build_names_trie
-      @names_trie = Triez.new(value_type: :object)
-
-      @name_map.each do |ordered_name, _|
-        @names_trie.change_all(:suffix, ordered_name) do |old_ordered_names| 
-          (Array(old_ordered_names).push ordered_name).uniq 
-        end
-      end
-    end
-
-    def create_indices_map
-      @phone_age_map = {}
-      @name_map = {}
-
-      @people.each_with_index do |p, i|
-        @phone_age_map[p.age] ||= []
-        @phone_age_map[p.stripped_phone] ||= []
-        @name_map[p.ordered_name] ||= []
-
-        @phone_age_map[p.age] << i
-        @phone_age_map[p.stripped_phone] << i
-        @name_map[p.ordered_name] << i
+      str_arr.map do |p|
+        args = JSON.parse(p)
+        p = Person.first_or_new(name: args['name'],
+                      phone: args['phone'],
+                      age: args['birthday'],
+                      address: args['address'],
+                      avatar_image: args['avatar_image'],
+                      avatar_origin: args['avatar_origin'])
+        p.normalize
+        p.save
       end
     end
   end

@@ -5,7 +5,7 @@ describe "Datastore" do
     before(:all) { @datastore = RSpec.configuration.datastore }
     
     context "#search" do
-        let(:person){@datastore.instance_variable_get(:@people).first}
+        let(:person){P1000YellowPages::Person.first}
         let(:query_str) {"#{person.name} #{person.phone} #{person.age}"}
             
         context "when the query is ilegal" do
@@ -15,22 +15,6 @@ describe "Datastore" do
                 expect(@datastore.search person.name).to be_empty
             end
         end
-        context "when the age is greater than the max age in the datastore" do
-           it "returns an empty array" do
-               max_age = @datastore.instance_variable_get(:@max_age)
-               query = double("Query", 'legal?' => true, age: max_age+1)
-                allow(P1000YellowPages::Query).to receive(:new).and_return(query)
-                expect(@datastore.search person.name).to be_empty
-           end
-        end
-        context "when the age is lesser than the min age in the datastore" do
-           it "returns an empty array" do
-               min_age = @datastore.instance_variable_get(:@min_age)
-               query = double("Query", 'legal?' => true, age: min_age-1)
-                allow(P1000YellowPages::Query).to receive(:new).and_return(query)
-                expect(@datastore.search person.name).to be_empty
-           end
-        end 
         context "when the person does not exist" do
            it "returns an empty array" do
                (query_str.split.count + 1).times do |n|
@@ -45,7 +29,7 @@ describe "Datastore" do
         end
         context "with the correct keywords" do
             it "finds the person" do
-                people = @datastore.instance_variable_get :@people
+                people = P1000YellowPages::Person.all
                 people.first(EXAMPLES_AMOUNT).each do |person|
                     [person.phone, person.phone.sub('-','')].each do |phone|
                         query_arry = [person.name.split, phone, person.age]
